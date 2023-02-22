@@ -24,7 +24,7 @@
         </div>
         <div class="col-md-12 mt-1 mb-2"><button id="addNewBook" class="btn btn-success">Add</button></div>
         <div class="col-md-12">
-            <table class="table">
+            <table class="table" id="my_table">
               <thead>
                 <tr>
                   <th scope="col">#</th>
@@ -100,9 +100,14 @@
     </div>
 </div>
 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.js"></script>
+
     
 <script type="text/javascript">
     $(document).ready(function(){
+        $('#my_table').dataTable(); 
+
         var form_type ;
         $.ajaxSetup({
             headers: {
@@ -117,7 +122,6 @@
             $('.d-none').text('add');
             form_type = 'add';
 
-            //Error reset
             $("#error").text(' ');
             $('input[name="title"]').parents('.form-group').find('#error').text('');
             $('input[name="code"]').parents('.form-group').find('#error').text('');
@@ -126,10 +130,8 @@
 
         $(document).on("click", ".edit", function () {
             var id = $(this).data("id");
-           //var form_type  =   $(this).text();
-           form_type = 'edit';
-           //alert(form_type);
-            //Error reset
+
+            form_type = 'edit';
             $("#error").text(' ');
             $('input[name="title"]').parents('.form-group').find('#error').text('');
             $('input[name="code"]').parents('.form-group').find('#error').text('');
@@ -152,25 +154,7 @@
             });
         });
 
-        $("body").on("click", ".delete", function () {
-            if (confirm("Delete Record?") == true) {
-                var id = $(this).data("id");
-
-                $.ajax({
-                    type: "POST",
-                    url: "{{ url('delete-book') }}",
-                    data: { id: id },
-                    dataType: "json",
-                    success: function (res) {
-                        //window.location.reload();
-                        $('#book_id_'+id).remove();
-                    },
-                });
-            }
-        });
-
         $("body").on("click", "#btn-save", function() {
-            //var form_type   =  $('.d-none').text();
             var id = $("#id").val();
             var title = $("#title").val();
             var code = $("#code").val();
@@ -192,7 +176,6 @@
                         });
                     }else{
                         var res    =   response.book;
-                        //alert(form_type);
                         if(form_type == 'add'){
                             var elem='';
                             elem += '<tr book_id_'+res.id+'>'+
@@ -206,6 +189,8 @@
                                     '</tr>';
                             $('.book_body').prepend(elem); 
                         }else{
+                            //$('#my_table').DataTable().ajax.reload();
+
                             $(".td_title_"+id).text(res.title);
                             $(".td_code_"+id).text(res.code);
                             $(".td_author_"+id).text(res.author);
@@ -218,6 +203,23 @@
                     console.log(form_type);
                 },
             });
+        });
+
+        $("body").on("click", ".delete", function () {
+            if (confirm("Delete Record?") == true) {
+                var id = $(this).data("id");
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url('delete-book') }}",
+                    data: { id: id },
+                    dataType: "json",
+                    success: function (res) {
+                        //window.location.reload();
+                        $('#book_id_'+id).remove();
+                    },
+                });
+            }
         });
     });
     $(document).on('keyup','input',function(){
